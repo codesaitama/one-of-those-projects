@@ -1,13 +1,18 @@
 import React, {useState} from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Button, Dimensions, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import Task from './src/Task'
+import Task from './src/Task';
+const { width } = Dimensions.get("window");
 
 export default function App() {
   const [task, setTask] = useState<string>('');
-  const [taskItems, setTaskItems] = useState<Array<string>>([])
+  const [taskItems, setTaskItems] = useState<Array<string>>([]);
+  const [isModalVisible, setModalVisible] = useState<boolean>(false);
 
   const handleOnAddTask = () => {
+    setModalVisible(!isModalVisible)
+    if(!task)return;
+
     Keyboard.dismiss();
     setTaskItems([...taskItems, task]);
     setTask('')
@@ -19,7 +24,12 @@ export default function App() {
     setTaskItems(itemsCopy);
   }
 
+  const toggleModalVisibility = () =>{
+    setModalVisible(!isModalVisible)
+  }
+
   return (
+    <>
     <View style={styles.container}>
       {/*Today's tasks */}
       <View style={styles.taskWrapper}>
@@ -38,20 +48,30 @@ export default function App() {
       </View>
 
       {/* Write a task */}
-      <View style={styles.bgWrapper}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-        style={styles.writeTaskWrapper}>
-          <TextInput style={styles.input} value={task} onChangeText={text => setTask(text)} placeholder={"Write a task"} />
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.writeTaskWrapper}>
+        {/* <TextInput style={styles.input} value={task} onChangeText={text => setTask(text)} placeholder={"Write a task"} /> */}
 
-          <TouchableOpacity onPress={handleOnAddTask}>
-            <View style={styles.addWrapper}>
-              <Text style={styles.addText}>+</Text>
-            </View>
-          </TouchableOpacity>
-        </KeyboardAvoidingView>
-      </View>
-      
+        <TouchableOpacity onPress={handleOnAddTask}>
+          <View style={styles.addWrapper}>
+            <Text style={styles.addText}>+</Text>
+          </View>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
+
+      <Modal animationType="slide" 
+                   transparent visible={isModalVisible} 
+                   presentationStyle="overFullScreen" 
+                   onDismiss={toggleModalVisibility}>
+                <View style={styles.viewWrapper}>
+                    <View style={styles.modalView}>
+                    <TextInput style={styles.input} value={task} onChangeText={text => setTask(text)} placeholder={"Write a task"} />
+                        {/** This button is responsible to close the modal */}
+                        <Button title="Close" onPress={toggleModalVisibility} />
+                    </View>
+                </View>
+            </Modal>
     </View>
+    </>
   );
 }
 
@@ -61,8 +81,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#E7EAEA'
   },
   taskWrapper: {
-    paddingTop: 80,
-    paddingHorizontal: 20
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    margin: -5
   },
   sectionTitle:{
     fontSize: 24,
@@ -72,18 +93,14 @@ const styles = StyleSheet.create({
   items:{
     marginTop: 30,
   },
-  bgWrapper:{
-    // marginHorizontal: 20,
-    paddingVertical: 20,
-    backgroundColor: '#212121'
-  },
   writeTaskWrapper:{
     position: 'absolute',
     bottom: 45,
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-around',
-    alignItems: 'center'
+    alignItems: 'center',
+    // backgroundColor: '#E7EAEA'
   },
   input:{
     paddingVertical: 15,
@@ -96,17 +113,56 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   addWrapper:{
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 60,
     backgroundColor: '#FFF',
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
     borderColor: '#C0C0C0',
-    borderWidth: 1
+    borderWidth: 1,
+    // position: 'absolute', 
+    // right: 20,
+    // bottom: 0,
   },
   addText:{
     fontWeight: 'bold',
-    fontSize: 22
-  }
+    fontSize: 30,
+  },
+
+  screen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+},
+viewWrapper: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+},
+modalView: {
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    elevation: 5,
+    transform: [{ translateX: -(width * 0.4) }, 
+                { translateY: -90 }],
+    height: 180,
+    width: width * 0.8,
+    backgroundColor: "#fff",
+    borderRadius: 7,
+},
+textInput: {
+    width: "80%",
+    borderRadius: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderColor: "rgba(0, 0, 0, 0.2)",
+    borderWidth: 1,
+    marginBottom: 8,
+},
 });

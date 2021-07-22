@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import { Button, Dimensions, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import DatePicker from 'react-native-datepicker';
 
 import Task from './src/Task';
 const { width } = Dimensions.get("window");
@@ -8,6 +9,9 @@ export default function App() {
   const [task, setTask] = useState<string>('');
   const [taskItems, setTaskItems] = useState<Array<string>>([]);
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
+  const [date, setDate] = useState<Date | string>(new Date(1598051730000));
+  const [mode, setMode] = useState<"date" | "datetime" | "time" | undefined>('date');
+  const [show, setShow] = useState<boolean>(false);
 
   const handleOnAddTask = () => {
     setModalVisible(!isModalVisible)
@@ -17,6 +21,12 @@ export default function App() {
     setTaskItems([...taskItems, task]);
     setTask('')
   }
+
+  const onChange = (event: string, selectedDate?: Date): void => {
+    const currentDate = selectedDate || date;
+    setShow(Platform.OS === 'ios');
+    setDate(currentDate);
+  };
 
   const completedTask = (index: number) => {
     let itemsCopy = [...taskItems];
@@ -65,6 +75,24 @@ export default function App() {
                 <View style={styles.viewWrapper}>
                     <View style={styles.modalView}>
                     <TextInput style={styles.input} value={task} onChangeText={text => setTask(text)} placeholder={"Write a task"} />
+                    <DatePicker mode={mode} androidMode="calendar"
+                              placeholder="select date"
+                              format="YYYY-MM-DD"
+                              minDate="2016-05-01"
+                              maxDate="2016-06-01"
+                              confirmBtnText="Confirm"
+                              cancelBtnText="Cancel"
+                              customStyles={{
+                                  dateIcon: {
+                                      position: 'absolute',
+                                      left: 0,
+                                      top: 4,
+                                      marginLeft: 0
+                                  },
+                                  dateInput: {
+                                      marginLeft: 36
+                                  }
+                              }} onDateChange={onChange} />
                         {/** This button is responsible to close the modal */}
                         <Button title="Close" onPress={toggleModalVisibility} />
                     </View>
